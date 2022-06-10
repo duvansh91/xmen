@@ -14,7 +14,7 @@ func Run() {
 	isMutantUseCase := usecases.NewValidateIsMutantUseCase()
 	isMutantHandler := handlers.NewIsMutantHandler(isMutantUseCase)
 	isMutantRoute := server.Route{
-		Name:    "/mutant",
+		Name:    "/mutant/",
 		Method:  http.MethodPost,
 		Handler: isMutantHandler.Handle,
 	}
