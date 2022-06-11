@@ -15,10 +15,19 @@ func NewValidateIsMutantUseCase() *ValidateIsMutantUseCase {
 }
 
 func (uc *ValidateIsMutantUseCase) Validate(h *models.Human) (bool, error) {
-	isMutant := false
 	n := len(h.DNA) - 1
 
-	// Vertical and horizontal mapping and DNA validation
+	verticalAndHorizontal, err := verticalAndHorizontalMappingAndValidation(n, h.DNA)
+	if err != nil {
+		return false, err
+	}
+
+	oblique := obliqueMapping(n, h.DNA)
+
+	return verticalAndHorizontal || oblique, nil
+}
+
+func verticalAndHorizontalMappingAndValidation(n int, dna []string) (bool, error) {
 	for i := 0; i <= n; i++ {
 		verticalLastChar := ""
 		horizontalLastChar := ""
@@ -26,32 +35,35 @@ func (uc *ValidateIsMutantUseCase) Validate(h *models.Human) (bool, error) {
 		horizontalCount := 0
 
 		for j := 0; j <= n; j++ {
-			if !strings.Contains("ATCG", string(h.DNA[j][i])) {
-				return false, errors.New("invalid DNA")
+			if !strings.Contains("ATCG", string(dna[j][i])) {
+				return false, errors.New("ADN inválido")
 			}
 
-			if verticalLastChar == string(h.DNA[j][i]) {
+			if verticalLastChar == string(dna[j][i]) {
 				verticalCount += 1
 			} else {
 				verticalCount = 0
 			}
 
-			if horizontalLastChar == string(h.DNA[i][j]) {
+			if horizontalLastChar == string(dna[i][j]) {
 				horizontalCount += 1
 			} else {
 				horizontalCount = 0
 			}
 
-			verticalLastChar = string(h.DNA[j][i])
-			horizontalLastChar = string(h.DNA[i][j])
+			verticalLastChar = string(dna[j][i])
+			horizontalLastChar = string(dna[i][j])
 
 			if verticalCount >= 3 || horizontalCount >= 3 {
-				isMutant = true
+				return true, nil
 			}
 		}
 	}
 
-	// Oblique mapping
+	return false, nil
+}
+
+func obliqueMapping(n int, dna []string) bool {
 	for i := 0; i <= n*2; i++ {
 		obliqueLastChar := ""
 		obliqueCount := 0
@@ -65,11 +77,11 @@ func (uc *ValidateIsMutantUseCase) Validate(h *models.Human) (bool, error) {
 			currentChar := ""
 
 			if i <= n {
-				currentChar = string(h.DNA[Abs((n-i)+j)][j])
+				currentChar = string(dna[abs((n-i)+j)][j])
 			}
 
 			if i > n {
-				currentChar = string(h.DNA[j][Abs(n-i)+j])
+				currentChar = string(dna[j][abs(n-i)+j])
 			}
 
 			if currentChar == obliqueLastChar {
@@ -79,17 +91,17 @@ func (uc *ValidateIsMutantUseCase) Validate(h *models.Human) (bool, error) {
 			}
 
 			if obliqueCount >= 3 {
-				isMutant = true
+				return true
 			}
 
 			obliqueLastChar = currentChar
 		}
 	}
 
-	return isMutant, nil
+	return false
 }
 
-func Abs(x int) int {
+func abs(x int) int {
 	if x < 0 {
 		return -x
 	}

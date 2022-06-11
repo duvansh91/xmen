@@ -17,6 +17,7 @@ func Test_HandleValidation_HandleValidation(t *testing.T) {
 
 	type mocksProvider struct {
 		ValidateIsMutantMock *mocks.ValidateIsMutant
+		SaveHumanMock        *mocks.SaveHuman
 	}
 
 	human := &models.Human{
@@ -28,21 +29,23 @@ func Test_HandleValidation_HandleValidation(t *testing.T) {
 		args     args
 		funcMock func(mocks mocksProvider, args args)
 		mocks    mocksProvider
-		want     *Response
+		want     *IsMutantResponse
 	}{
 		{
 			name: "validate when is mutant",
 			mocks: mocksProvider{
 				ValidateIsMutantMock: &mocks.ValidateIsMutant{},
+				SaveHumanMock:        &mocks.SaveHuman{},
 			},
 			args: args{
 				human: human,
 			},
 			funcMock: func(mocks mocksProvider, args args) {
 				mocks.ValidateIsMutantMock.On("Validate", human).Once().Return(true, nil)
+				mocks.SaveHumanMock.On("Save", human).Once().Return(nil)
 			},
-			want: &Response{
-				Message:  IsMutant,
+			want: &IsMutantResponse{
+				Message:  IsMutantMsg,
 				HttpCode: http.StatusOK,
 			},
 		},
@@ -50,20 +53,22 @@ func Test_HandleValidation_HandleValidation(t *testing.T) {
 			name: "validate when is not mutant",
 			mocks: mocksProvider{
 				ValidateIsMutantMock: &mocks.ValidateIsMutant{},
+				SaveHumanMock:        &mocks.SaveHuman{},
 			},
 			args: args{
 				human: human,
 			},
 			funcMock: func(mocks mocksProvider, args args) {
 				mocks.ValidateIsMutantMock.On("Validate", human).Once().Return(false, nil)
+				mocks.SaveHumanMock.On("Save", human).Once().Return(nil)
 			},
-			want: &Response{
-				Message:  IsNotMutant,
+			want: &IsMutantResponse{
+				Message:  IsNotMutantMsg,
 				HttpCode: http.StatusForbidden,
 			},
 		},
 		{
-			name: "thrown an error from use case",
+			name: "throws an error from validate human use case",
 			mocks: mocksProvider{
 				ValidateIsMutantMock: &mocks.ValidateIsMutant{},
 			},
@@ -73,8 +78,26 @@ func Test_HandleValidation_HandleValidation(t *testing.T) {
 			funcMock: func(mocks mocksProvider, args args) {
 				mocks.ValidateIsMutantMock.On("Validate", human).Once().Return(false, errors.New("invalid DNA"))
 			},
-			want: &Response{
+			want: &IsMutantResponse{
 				Message:  "invalid DNA",
+				HttpCode: http.StatusInternalServerError,
+			},
+		},
+		{
+			name: "throws an error from save human use case",
+			mocks: mocksProvider{
+				ValidateIsMutantMock: &mocks.ValidateIsMutant{},
+				SaveHumanMock:        &mocks.SaveHuman{},
+			},
+			args: args{
+				human: human,
+			},
+			funcMock: func(mocks mocksProvider, args args) {
+				mocks.ValidateIsMutantMock.On("Validate", human).Once().Return(true, nil)
+				mocks.SaveHumanMock.On("Save", human).Once().Return(errors.New("internal server error"))
+			},
+			want: &IsMutantResponse{
+				Message:  "internal server error",
 				HttpCode: http.StatusInternalServerError,
 			},
 		},
@@ -83,7 +106,7 @@ func Test_HandleValidation_HandleValidation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.funcMock(tt.mocks, tt.args)
-			handler := NewIsMutantHandler(tt.mocks.ValidateIsMutantMock)
+			handler := NewIsMutantHandler(tt.mocks.ValidateIsMutantMock, tt.mocks.SaveHumanMock)
 
 			got := handler.HandleValidation(tt.args.human)
 

@@ -9,35 +9,37 @@ import (
 )
 
 const (
-	IsMutant    = "Es un mutante"
-	IsNotMutant = "No es un mutante"
+	IsMutantMsg    = "Es un mutante"
+	IsNotMutantMsg = "No es un mutante"
 )
 
 type IsMutantHandler struct {
-	useCase usecases.ValidateIsMutant
+	isMutantUseCase  usecases.ValidateIsMutant
+	saveHumanUseCase usecases.SaveHuman
 }
 
 type Request struct {
 	DNA []string
 }
 
-type Response struct {
+type IsMutantResponse struct {
 	Message  string `json:"message"`
 	HttpCode int    `json:"code"`
 }
 
-func NewIsMutantHandler(useCase usecases.ValidateIsMutant) *IsMutantHandler {
+func NewIsMutantHandler(
+	isMutantUseCase usecases.ValidateIsMutant,
+	saveHumanUseCase usecases.SaveHuman,
+) *IsMutantHandler {
 	return &IsMutantHandler{
-		useCase: useCase,
+		isMutantUseCase:  isMutantUseCase,
+		saveHumanUseCase: saveHumanUseCase,
 	}
 }
 
 func (h *IsMutantHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	request := Request{}
-	response := Response{
-		Message:  IsNotMutant,
-		HttpCode: http.StatusForbidden,
-	}
+	response := IsMutantResponse{}
 
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
@@ -45,40 +47,56 @@ func (h *IsMutantHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		response.HttpCode = http.StatusBadRequest
 	}
 
-	human := &models.Human{
-		DNA: request.DNA,
-	}
+	if len(request.DNA) == 0 {
+		response.Message = "invalid DNA"
+		response.HttpCode = http.StatusBadRequest
+	} else {
+		human := &models.Human{
+			DNA: request.DNA,
+		}
 
-	responseValidation := h.HandleValidation(human)
-	response.Message = responseValidation.Message
-	response.HttpCode = responseValidation.HttpCode
+		responseValidation := h.HandleValidation(human)
+		response.Message = responseValidation.Message
+		response.HttpCode = responseValidation.HttpCode
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(response.HttpCode)
 	json.NewEncoder(w).Encode(response.Message)
 }
 
-func (h *IsMutantHandler) HandleValidation(hu *models.Human) *Response {
-	response := Response{}
+func (h *IsMutantHandler) HandleValidation(hu *models.Human) *IsMutantResponse {
+	response := IsMutantResponse{}
 
-	response = Response{
-		Message:  IsNotMutant,
-		HttpCode: http.StatusForbidden,
-	}
-
-	isMutant, err := h.useCase.Validate(hu)
-
-	if isMutant {
-		response = Response{
-			Message:  IsMutant,
-			HttpCode: http.StatusOK,
-		}
-	}
-
+	isMutant, err := h.isMutantUseCase.Validate(hu)
 	if err != nil {
-		response = Response{
+		response = IsMutantResponse{
 			Message:  err.Error(),
 			HttpCode: http.StatusInternalServerError,
+		}
+	} else {
+		hu.IsMutant = false
+
+		response = IsMutantResponse{
+			Message:  IsNotMutantMsg,
+			HttpCode: http.StatusForbidden,
+		}
+
+		if isMutant {
+			hu.IsMutant = true
+
+			response = IsMutantResponse{
+				Message:  IsMutantMsg,
+				HttpCode: http.StatusOK,
+			}
+		}
+
+		err = h.saveHumanUseCase.Save(hu)
+		if err != nil {
+			response = IsMutantResponse{
+				Message:  err.Error(),
+				HttpCode: http.StatusInternalServerError,
+			}
 		}
 	}
 

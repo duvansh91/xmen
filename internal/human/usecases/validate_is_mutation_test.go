@@ -21,14 +21,14 @@ func Test_ValidateIsMutantUseCase_Validate(t *testing.T) {
 		want    bool
 	}{
 		{
-			name: "response error when get an invalid DNA",
+			name: "response error when get an ADN inválido",
 			args: args{
 				human: &models.Human{
 					DNA: []string{"XXXXXX", "CAGTGC", "TTATGT", "AGAAGG", "CCCCTA", "TCACTG"},
 				},
 			},
 			wantErr: true,
-			msgErr:  "invalid DNA",
+			msgErr:  "ADN inválido",
 		},
 		{
 			name: "reponse is mutant when has an oblique sequence",
@@ -61,7 +61,7 @@ func Test_ValidateIsMutantUseCase_Validate(t *testing.T) {
 			want:    true,
 		},
 		{
-			name: "reponse is mutant when has horizontal sequence match",
+			name: "reponse is mutant not mutant",
 			args: args{
 				human: &models.Human{
 					DNA: []string{"TTGCGA", "CAGTAC", "TTATGT", "AGAAGG", "GCCCTA", "TCACTG"},

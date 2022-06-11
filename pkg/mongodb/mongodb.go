@@ -11,7 +11,7 @@ import (
 const Collection = "humans"
 
 type MongoDB struct {
-	collection *mongo.Collection
+	Collection *mongo.Collection
 }
 
 type ConnectionOpts struct {
@@ -36,6 +36,6 @@ func NewMongoDB(opts *ConnectionOpts) (*MongoDB, error) {
 	}
 
 	return &MongoDB{
-		collection: client.Database(opts.Database).Collection(Collection),
+		Collection: client.Database(opts.Database).Collection(Collection),
 	}, nil
 }

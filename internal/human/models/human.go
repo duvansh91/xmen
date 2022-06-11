@@ -1,5 +1,6 @@
 package models
 
 type Human struct {
-	DNA []string
+	DNA      []string `bson:"dna"`
+	IsMutant bool     `bson:"is_mutant"`
 }

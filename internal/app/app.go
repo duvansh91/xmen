@@ -8,6 +8,7 @@ import (
 
 	"github.com/duvansh91/xmen/internal/human/handlers"
 	"github.com/duvansh91/xmen/internal/human/usecases"
+	"github.com/duvansh91/xmen/internal/shared/persistence"
 	"github.com/duvansh91/xmen/pkg/mongodb"
 	"github.com/duvansh91/xmen/pkg/server"
 )
@@ -26,22 +27,39 @@ func Run() {
 		Database: config.DBName,
 	}
 
-	_, err = mongodb.NewMongoDB(connectionOpts)
+	client, err := mongodb.NewMongoDB(connectionOpts)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
 	// Setup routes
+
+	humanRepository := persistence.NewHumanMongoDBRepository(client)
+
+	// /mutant
 	isMutantUseCase := usecases.NewValidateIsMutantUseCase()
-	isMutantHandler := handlers.NewIsMutantHandler(isMutantUseCase)
+	saveHumanUsecase := usecases.NewSaveHumanUseCase(humanRepository)
+
+	isMutantHandler := handlers.NewIsMutantHandler(isMutantUseCase, saveHumanUsecase)
 	isMutantRoute := server.Route{
 		Name:    "/mutant/",
 		Method:  http.MethodPost,
 		Handler: isMutantHandler.Handle,
 	}
 
+	// /stats
+	getStatsUsecase := usecases.NewGetStatsUseCase(humanRepository)
+
+	getStatsHandler := handlers.NewGetStatsHandler(getStatsUsecase)
+	getStatsRoute := server.Route{
+		Name:    "/stats/",
+		Method:  http.MethodGet,
+		Handler: getStatsHandler.Handle,
+	}
+
 	routes := []server.Route{
 		isMutantRoute,
+		getStatsRoute,
 	}
 
 	s := server.New(routes)
