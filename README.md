@@ -6,6 +6,14 @@ REST API que valida si un humano es un mutante.
 Para ejecutar el api localmente se requiere tener instalado `Docker`y `Docker Compose`.
 * Ubicado en la raíz del proyecto, Ejecutar el siguiente comando `docker-compose up`. Esto creará un contenedor para la API y un contenedor para la base de datos (mongoDB).
 
+Por defecto el API estara corriendo en el puerto 8080, si desea cambiarla puede hacerlo en el archivo `docker-compose.yaml` en la sección `environment`.
+
+Ejemplo de urls locales:
+
+`http://localhost:8080/mutant/`
+
+`http://localhost:8080/stats/`
+
 # Como ejecutarlo
 Utilizando un cliente (Postman, insomnia, etc) puede probar las siguientes rutas:
 * Validar si un humano es mutante:
