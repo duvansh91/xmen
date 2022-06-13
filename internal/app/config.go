@@ -3,8 +3,6 @@ package app
 import (
 	"errors"
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
 // Config groups config variables
@@ -16,11 +14,6 @@ type Config struct {
 
 // NewConfig creates a new Config struct instance
 func NewConfig() (*Config, error) {
-
-	if err := godotenv.Load(); err != nil {
-		return nil, errors.New("no env file found")
-	}
-
 	serverPort := os.Getenv("SERVER_PORT")
 	if serverPort == "" {
 		return nil, errors.New("SERVER_PORT env var is empty")
