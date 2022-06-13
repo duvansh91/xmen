@@ -1,0 +1,12 @@
+**/coverage.html
+**/coverage.txt
+coverage/
+
+node_modules/
+bin/
+
+.vscode/
+
+**/vendor
+
+.env

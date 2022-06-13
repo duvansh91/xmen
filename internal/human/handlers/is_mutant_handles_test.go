@@ -108,7 +108,7 @@ func Test_HandleValidation_HandleValidation(t *testing.T) {
 			tt.funcMock(tt.mocks, tt.args)
 			handler := NewIsMutantHandler(tt.mocks.ValidateIsMutantMock, tt.mocks.SaveHumanMock)
 
-			got := handler.HandleValidation(tt.args.human)
+			got := handler.Validate(tt.args.human)
 
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Handler.HandleValidation() \nactual = %v \nexpect = %v", got, tt.want)

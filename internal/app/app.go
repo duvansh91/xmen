@@ -13,9 +13,8 @@ import (
 	"github.com/duvansh91/xmen/pkg/server"
 )
 
-// Run Set up all configurations and instances to run the server
+// Run set up all configurations and instances to run the server
 func Run() {
-	// Setup database
 	config, err := NewConfig()
 	if err != nil {
 		log.Fatal(err.Error())
@@ -32,14 +31,10 @@ func Run() {
 		log.Fatal(err.Error())
 	}
 
-	// Setup routes
-
 	humanRepository := persistence.NewHumanMongoDBRepository(client)
 
-	// /mutant
 	isMutantUseCase := usecases.NewValidateIsMutantUseCase()
 	saveHumanUsecase := usecases.NewSaveHumanUseCase(humanRepository)
-
 	isMutantHandler := handlers.NewIsMutantHandler(isMutantUseCase, saveHumanUsecase)
 	isMutantRoute := server.Route{
 		Name:    "/mutant/",
@@ -47,9 +42,7 @@ func Run() {
 		Handler: isMutantHandler.Handle,
 	}
 
-	// /stats
 	getStatsUsecase := usecases.NewGetStatsUseCase(humanRepository)
-
 	getStatsHandler := handlers.NewGetStatsHandler(getStatsUsecase)
 	getStatsRoute := server.Route{
 		Name:    "/stats/",
@@ -62,9 +55,8 @@ func Run() {
 		getStatsRoute,
 	}
 
-	s := server.New(routes)
+	s := server.NewSever(routes)
 
-	// Run server
 	err = http.ListenAndServe(fmt.Sprintf(":%s", config.ServerPort), s.Router())
 	if err != nil {
 		log.Fatal(err)

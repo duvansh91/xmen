@@ -13,20 +13,24 @@ const (
 	IsNotMutantMsg = "No es un mutante"
 )
 
+// GetStatsHandler groups use cases needed to is mutant handler.
 type IsMutantHandler struct {
 	isMutantUseCase  usecases.ValidateIsMutant
 	saveHumanUseCase usecases.SaveHuman
 }
 
-type Request struct {
+// IsMutantRequest defines a is mutant handler request.
+type IsMutantRequest struct {
 	DNA []string
 }
 
+// IsMutantResponse defines a is mutant handler response.
 type IsMutantResponse struct {
 	Message  string `json:"message"`
 	HttpCode int    `json:"code"`
 }
 
+// NewIsMutantHandler creates a new instance of IsMutantHandler.
 func NewIsMutantHandler(
 	isMutantUseCase usecases.ValidateIsMutant,
 	saveHumanUseCase usecases.SaveHuman,
@@ -37,8 +41,9 @@ func NewIsMutantHandler(
 	}
 }
 
+// Handle handles a callback from a request.
 func (h *IsMutantHandler) Handle(w http.ResponseWriter, r *http.Request) {
-	request := Request{}
+	request := IsMutantRequest{}
 	response := IsMutantResponse{}
 
 	err := json.NewDecoder(r.Body).Decode(&request)
@@ -55,7 +60,7 @@ func (h *IsMutantHandler) Handle(w http.ResponseWriter, r *http.Request) {
 			DNA: request.DNA,
 		}
 
-		responseValidation := h.HandleValidation(human)
+		responseValidation := h.Validate(human)
 		response.Message = responseValidation.Message
 		response.HttpCode = responseValidation.HttpCode
 	}
@@ -65,7 +70,8 @@ func (h *IsMutantHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response.Message)
 }
 
-func (h *IsMutantHandler) HandleValidation(hu *models.Human) *IsMutantResponse {
+// Validate validates a mutant through use case.
+func (h *IsMutantHandler) Validate(hu *models.Human) *IsMutantResponse {
 	response := IsMutantResponse{}
 
 	isMutant, err := h.isMutantUseCase.Validate(hu)

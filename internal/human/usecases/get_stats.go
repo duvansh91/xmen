@@ -5,16 +5,19 @@ import (
 	"github.com/duvansh91/xmen/internal/shared/persistence"
 )
 
+// GetStatsUseCase groups structs needed to get stats use case.
 type GetStatsUseCase struct {
 	repository persistence.HumanRepository
 }
 
+// NewGetStatsUseCase creates a new instance of GetStatsUseCase
 func NewGetStatsUseCase(repository persistence.HumanRepository) *GetStatsUseCase {
 	return &GetStatsUseCase{
 		repository: repository,
 	}
 }
 
+// Get gets stats from a repository.
 func (uc *GetStatsUseCase) Get() (*models.Stats, error) {
 	results, err := uc.repository.FindAll()
 	if err != nil {
@@ -32,9 +35,9 @@ func (uc *GetStatsUseCase) Get() (*models.Stats, error) {
 		humans += 1
 	}
 
-	ratio := 1
+	var ratio float32 = 1
 	if mutants != 0 {
-		ratio = mutants / humans
+		ratio = float32(mutants) / float32(humans+mutants)
 	}
 
 	stats := &models.Stats{

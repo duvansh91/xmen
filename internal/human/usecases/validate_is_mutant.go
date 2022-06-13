@@ -7,13 +7,16 @@ import (
 	"github.com/duvansh91/xmen/internal/human/models"
 )
 
+// SaveHumanUseCase groups structs needed to validate is mutant use case.
 type ValidateIsMutantUseCase struct {
 }
 
+// NewValidateIsMutantUseCase creates a new instance of ValidateIsMutantUseCase.
 func NewValidateIsMutantUseCase() *ValidateIsMutantUseCase {
 	return &ValidateIsMutantUseCase{}
 }
 
+// Validate checks if a human is mutant based in a DNA.
 func (uc *ValidateIsMutantUseCase) Validate(h *models.Human) (bool, error) {
 	n := len(h.DNA) - 1
 

@@ -10,16 +10,19 @@ import (
 
 const Collection = "humans"
 
+// MongoDB groups structs needed to mongodb.
 type MongoDB struct {
 	Collection *mongo.Collection
 }
 
+// ConnectionOpts groups options to a mongo connection.
 type ConnectionOpts struct {
 	Ctx      context.Context
 	Uri      string
 	Database string
 }
 
+// NewMongoDB creates a new instance of MongoDB.
 func NewMongoDB(opts *ConnectionOpts) (*MongoDB, error) {
 	options := options.Client()
 	options.ApplyURI(opts.Uri)

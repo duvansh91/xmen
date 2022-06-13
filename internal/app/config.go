@@ -7,12 +7,14 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// Config groups config variables
 type Config struct {
 	DBUri      string
 	DBName     string
 	ServerPort string
 }
 
+// NewConfig creates a new Config struct instance
 func NewConfig() (*Config, error) {
 
 	if err := godotenv.Load(); err != nil {
