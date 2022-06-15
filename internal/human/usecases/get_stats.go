@@ -1,6 +1,8 @@
 package usecases
 
 import (
+	"strconv"
+
 	"github.com/duvansh91/xmen/internal/human/models"
 	"github.com/duvansh91/xmen/internal/shared/persistence"
 )
@@ -35,15 +37,17 @@ func (uc *GetStatsUseCase) Get() (*models.Stats, error) {
 		humans += 1
 	}
 
-	var ratio float32 = 1
+	var ratio float64 = 1
 	if mutants != 0 {
-		ratio = float32(mutants) / float32(humans+mutants)
+		rawRatio := float64(mutants) / float64(humans+mutants)
+		roundedRatio, _ := strconv.ParseFloat(strconv.FormatFloat(rawRatio, 'f', 1, 64), 64)
+		ratio = roundedRatio
 	}
 
 	stats := &models.Stats{
 		CountMutantDNA: int16(mutants),
 		CountHumanDNA:  int16(humans),
-		Ratio:          float32(ratio),
+		Ratio:          ratio,
 	}
 
 	return stats, nil

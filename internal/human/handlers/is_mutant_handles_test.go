@@ -10,7 +10,7 @@ import (
 	"github.com/duvansh91/xmen/internal/human/usecases/mocks"
 )
 
-func Test_HandleValidation_HandleValidation(t *testing.T) {
+func Test_IsMutantHandler_HandleValidation(t *testing.T) {
 	type args struct {
 		human *models.Human
 	}
